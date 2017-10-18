@@ -68,6 +68,16 @@
   <ItemGroup>
     <Compile Include="ARCUtil.cs" />
     <Compile Include="GarcUtil.cs" />
+    <Compile Include="Subforms\EnhancedRestore.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Subforms\EnhancedRestore.Designer.cs">
+      <DependentUpon>EnhancedRestore.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Subforms\Gen7\Wild\Area7.cs" />
+    <Compile Include="Subforms\Gen7\Wild\Encounter7.cs" />
+    <Compile Include="Subforms\Gen7\Wild\EncounterTable.cs" />
+    <Compile Include="Subforms\Gen7\Wild\Wild7Randomizer.cs" />
     <Compile Include="WinFormsUtil.cs" />
     <Compile Include="Misc\ErrorWindow.cs">
       <SubType>Form</SubType>
@@ -312,7 +322,6 @@
     <Compile Include="Subforms\Gen6\EggMoveEditor6.Designer.cs">
       <DependentUpon>EggMoveEditor6.cs</DependentUpon>
     </Compile>
-    <Compile Include="Legality\Legal.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -378,6 +387,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Misc\ErrorWindow.resx">
       <DependentUpon>ErrorWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Subforms\EnhancedRestore.resx">
+      <DependentUpon>EnhancedRestore.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Subforms\Gen7\EggMoveEditor7.resx">
       <DependentUpon>EggMoveEditor7.cs</DependentUpon>

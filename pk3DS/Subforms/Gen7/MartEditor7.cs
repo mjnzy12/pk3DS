@@ -1,5 +1,6 @@
 ﻿using pk3DS.Core;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 
@@ -67,22 +68,22 @@ namespace pk3DS
         private readonly string[] locations =
         {
             "No Trials", "1 Trial", "2 Trials", "3 Trials", "4 Trials", "5 Trials", "6 Trials", "7 Trials",
-            "KoniKoni Incense",
-            "KoniKoni Herb",
-            "Hau'oli Battle",
-            "Route 2",
-            "Heahea",
-            "Royal Avenue",
-            "Route 8",
-            "Paniola",
-            "Malie TMs",
-            "Mount Hokulani",
-            "Seafolk TM",
-            "KoniKoni TM",
-            "KoniKoni Jewelry",
-            "Thrifty 1",
-            "Thrifty 2",
-            "Thrifty 3 (Souvenir)"
+            "Konikoni City [Incenses]",
+            "Konikoni City [Herbs]",
+            "Hau'oli City [X Items]",
+            "Route 2 [Misc]",
+            "Heahea City [TMs]",
+            "Royal Avenue [TMs]",
+            "Route 8 [Misc]",
+            "Paniola Town [Poké Balls]",
+            "Malie City [TMs]",
+            "Mount Hokulani [Vitamins]",
+            "Seafolk Village [TMs]",
+            "Konikoni City [TMs]",
+            "Konikoni City [Stones]",
+            "Thrifty Megamart 1 [Poké Balls]",
+            "Thrifty Megamart 2 [Misc]",
+            "Thrifty Megamart 3 [Strange Souvenir]"
         };
 
         private readonly int[] entriesBP =
@@ -96,12 +97,12 @@ namespace pk3DS
         };
         private readonly string[] locationsBP =
         {
-            "Royal 1",
-            "Royal 2",
-            "Royal 3",
-            "Battle Tree 1",
-            "Battle Tree 2",
-            "Battle Tree 3",
+            "Battle Royal Dome [Medicine]",
+            "Battle Royal Dome [EV Training]",
+            "Battle Royal Dome [Held Items]",
+            "Battle Tree [Trade Evolution Items]",
+            "Battle Tree [Held Items]",
+            "Battle Tree [Mega Stones]",
         };
         #endregion
 
@@ -159,6 +160,19 @@ namespace pk3DS
             for (int i = 0; i < count; i++)
                 Array.Copy(BitConverter.GetBytes((ushort)Array.IndexOf(itemlist, dgv.Rows[i].Cells[1].Value)), 0, data, dataoffset + 2 * i, 2);
         }
+
+        /// <summary>
+        /// Just TMs & HMs; don't want these to be changed; if changed, they are not available elsewhere ingame.
+        /// </summary>
+        internal static readonly HashSet<int> BannedItems = new HashSet<int>
+        {
+            328, 329, 330, 331, 332, 333, 334, 335, 336, 337, 338, 339, 340, 341, 342, 343, 344, 345, 346, 347, 348,
+            349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369,
+            370, 371, 372, 373, 374, 375, 376, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 387, 388, 389, 390,
+            391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411,
+            412, 413, 414, 415, 416, 417, 418, 419, 420, 421, 422, 423, 424, 425, 426, 427, 618, 619, 620, 690, 691,
+            692, 693, 694, 701, 737
+        };
         private void B_Randomize_Click(object sender, EventArgs e)
         {
             if (DialogResult.Yes != WinFormsUtil.Prompt(MessageBoxButtons.YesNoCancel, "Randomize mart inventories?"))
@@ -176,6 +190,9 @@ namespace pk3DS
                 CB_Location.SelectedIndex = i;
                 for (int r = 0; r < dgv.Rows.Count; r++)
                 {
+                    int currentItem = Array.IndexOf(itemlist, dgv.Rows[r].Cells[1].Value);
+                    if (BannedItems.Contains(currentItem))
+                        continue;
                     dgv.Rows[r].Cells[1].Value = itemlist[validItems[ctr++]];
                     if (ctr <= validItems.Length) continue;
                     Util.Shuffle(validItems); ctr = 0;

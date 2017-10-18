@@ -28,7 +28,7 @@ namespace pk3DS
         private readonly string[] TargetingTypes =
         { "Single Adjacent Ally/Foe", 
             "Any Ally", "Any Adjacent Ally", "Single Adjacent Foe", "Everyone but User", "All Foes", 
-            "All Allies", "Self", "All Pokemon on Field", "Single Adjacent Foe (2)", "Entire Field", 
+            "All Allies", "Self", "All Pokémon on Field", "Single Adjacent Foe (2)", "Entire Field", 
             "Opponent's Field", "User's Field", "Self", 
         };
 
@@ -38,7 +38,7 @@ namespace pk3DS
             "Confusion", "Attract", "Capture", "Nightmare", "Curse", 
             "Taunt", "Torment", "Disable", "Yawn", "Heal Block", 
             "?", "Detect", "Leech Seed", "Embargo", "Perish Song", 
-            "Ingrain", 
+            "Ingrain", "??? 0x16", "??? 0x17", "Mute"
         };
 
         private readonly string[] MoveQualities =

@@ -63,6 +63,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this.L_Hint = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.L_Mega = new System.Windows.Forms.Label();
+            this.CHK_Mega = new System.Windows.Forms.CheckBox();
             this.GB_Tweak = new System.Windows.Forms.GroupBox();
             this.L_RandOpt = new System.Windows.Forms.Label();
             this.CHK_BST = new System.Windows.Forms.CheckBox();
@@ -542,6 +544,8 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.L_Mega);
+            this.tabPage2.Controls.Add(this.CHK_Mega);
             this.tabPage2.Controls.Add(this.GB_Tweak);
             this.tabPage2.Controls.Add(this.NUD_LevelBoost);
             this.tabPage2.Controls.Add(this.CHK_Level);
@@ -552,6 +556,27 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Randomizer Options";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // L_Mega
+            // 
+            this.L_Mega.Location = new System.Drawing.Point(26, 190);
+            this.L_Mega.Name = "L_Mega";
+            this.L_Mega.Size = new System.Drawing.Size(101, 33);
+            this.L_Mega.TabIndex = 512;
+            this.L_Mega.Text = "XY - Lucario\nORAS - Lati@s";
+            this.L_Mega.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // CHK_Mega
+            // 
+            this.CHK_Mega.AutoSize = true;
+            this.CHK_Mega.Checked = true;
+            this.CHK_Mega.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.CHK_Mega.Location = new System.Drawing.Point(9, 176);
+            this.CHK_Mega.Name = "CHK_Mega";
+            this.CHK_Mega.Size = new System.Drawing.Size(264, 17);
+            this.CHK_Mega.TabIndex = 511;
+            this.CHK_Mega.Text = "Replace Megas with Another Mega (via Held Item)";
+            this.CHK_Mega.UseVisualStyleBackColor = true;
             // 
             // GB_Tweak
             // 
@@ -812,5 +837,7 @@
         private System.Windows.Forms.CheckBox CHK_G3;
         private System.Windows.Forms.CheckBox CHK_G2;
         private System.Windows.Forms.CheckBox CHK_G1;
+        private System.Windows.Forms.CheckBox CHK_Mega;
+        private System.Windows.Forms.Label L_Mega;
     }
 }

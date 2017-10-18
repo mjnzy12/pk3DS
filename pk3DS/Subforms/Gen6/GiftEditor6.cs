@@ -1,9 +1,12 @@
-﻿using pk3DS.Core;
-using pk3DS.Core.Structures.Gen6;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+
+using pk3DS.Core;
+using pk3DS.Core.Randomizers;
+using pk3DS.Core.Structures;
 
 namespace pk3DS
 {
@@ -19,6 +22,8 @@ namespace pk3DS
                 Close();
             }
             InitializeComponent();
+            Dictionary<int, int[]> megaDictionary = GetMegaDictionary(Main.Config);
+            MegaDictionary = megaDictionary;
 
             specieslist[0] = "---";
             abilitylist[0] = itemlist[0] = movelist[0] = "(None)"; // blank == -1
@@ -32,6 +37,13 @@ namespace pk3DS
 
             loadData();
         }
+
+        public static Dictionary<int, int[]> GetMegaDictionary(GameConfig config)
+        {
+            return config.XY ? MegaDictionaryXY : MegaDictionaryAO.Concat(MegaDictionaryXY)
+                            .ToDictionary(pair => pair.Key, pair => pair.Value);
+        }
+
         private readonly string FieldPath = Path.Combine(Main.RomFSPath, "DllField.cro");
         private byte[] FieldData;
         private readonly int fieldOffset = Main.Config.ORAS ? 0xF906C : 0xF805C;
@@ -42,6 +54,7 @@ namespace pk3DS
         private readonly string[] movelist = Main.Config.getText(TextName.MoveNames);
         private readonly string[] itemlist = Main.Config.getText(TextName.ItemNames);
         private readonly string[] specieslist = Main.Config.getText(TextName.SpeciesNames);
+        private readonly Dictionary<int, int[]> MegaDictionary;
         private void B_Save_Click(object sender, EventArgs e)
         {
             saveEntry();
@@ -60,7 +73,7 @@ namespace pk3DS
             for (int i = 0; i < GiftData.Length; i++)
             {
                 GiftData[i] = new EncounterGift6(FieldData.Skip(fieldOffset + i * fieldSize).Take(fieldSize).ToArray(), Main.Config.ORAS);
-                LB_Gifts.Items.Add($"{i.ToString("00")} - {specieslist[GiftData[i].Species]}");
+                LB_Gifts.Items.Add($"{i:00} - {specieslist[GiftData[i].Species]}");
             }
             loaded = true;
             LB_Gifts.SelectedIndex = 0;
@@ -157,21 +170,40 @@ namespace pk3DS
         {
             if (WinFormsUtil.Prompt(MessageBoxButtons.YesNo, "Randomize all? Cannot undo.", "Double check Randomization settings in the Randomizer Options tab.") != DialogResult.Yes) return;
 
-            // Randomize by BST
-            bool bst = CHK_BST.Checked;
-            int[] sL = Randomizer.getSpeciesList(CHK_G1.Checked, CHK_G2.Checked, CHK_G3.Checked, CHK_G4.Checked, CHK_G5.Checked, CHK_G6.Checked, false,
-                CHK_L.Checked, CHK_E.Checked);
-            int ctr = 0;
+            var formrand = new FormRandomizer(Main.Config) { AllowMega = false, AllowAlolanForm = false };
+            var specrand = new SpeciesRandomizer(Main.Config)
+            {
+                G1 = CHK_G1.Checked,
+                G2 = CHK_G2.Checked,
+                G3 = CHK_G3.Checked,
+                G4 = CHK_G4.Checked,
+                G5 = CHK_G5.Checked,
+                G6 = CHK_G6.Checked,
+                G7 = false,
+
+                E = CHK_E.Checked,
+                L = CHK_L.Checked,
+
+                rBST = CHK_BST.Checked,
+            };
+            specrand.Initialize();
             for (int i = 0; i < LB_Gifts.Items.Count; i++)
             {
                 LB_Gifts.SelectedIndex = i;
                 int species = CB_Species.SelectedIndex;
-                if (species == 448)
-                    continue; // skip Lucario, battle needs to mega evolve
-                
-                species = Randomizer.getRandomSpecies(ref sL, ref ctr, species, bst, Main.SpeciesStat);
+                if (MegaDictionary.Values.Any(z => z.Contains(CB_HeldItem.SelectedIndex))) // mega stone gift pkm (only lucario?)
+                {
+                    if (!CHK_Mega.Checked)
+                        continue; // skip Lucario, battle needs to mega evolve
+
+                    int[] items = GetRandomMega(out species);
+                    CB_HeldItem.SelectedIndex = items[Util.rand.Next(0, items.Length)];
+                }
+                else
+                    species = specrand.GetRandomSpecies(species);
+
                 CB_Species.SelectedIndex = species;
-                NUD_Form.Value = Randomizer.GetRandomForme(species, false, true);
+                NUD_Form.Value = formrand.GetRandomForme(species);
                 NUD_Gender.Value = 0; // random
 
                 if (CHK_Level.Checked)
@@ -180,6 +212,66 @@ namespace pk3DS
             WinFormsUtil.Alert("Randomized all Gift Pokémon according to specification!");
         }
 
+        private int[] GetRandomMega(out int species)
+        {
+            int rnd = Util.rand.Next(0, MegaDictionary.Count - 1);
+            species = MegaDictionary.Keys.ElementAt(rnd);
+            return MegaDictionary.Values.ElementAt(rnd);
+        }
+
+        private static readonly Dictionary<int, int[]> MegaDictionaryXY = new Dictionary<int, int[]>
+        {
+            {003, new[] {659}}, // Venusaur @ Venusaurite
+            {006, new[] {660, 678}}, // Charizard @ Charizardite X/Y
+            {009, new[] {661}}, // Blastoise @ Blastoisinite
+            {065, new[] {679}}, // Alakazam @ Alakazite
+            {094, new[] {656}}, // Gengar @ Gengarite
+            {115, new[] {675}}, // Kangaskhan @ Kangaskhanite
+            {127, new[] {671}}, // Pinsir @ Pinsirite
+            {130, new[] {676}}, // Gyarados @ Gyaradosite
+            {142, new[] {672}}, // Aerodactyl @ Aerodactylite
+            {150, new[] {662, 663}}, // Mewtwo @ Mewtwonite X/Y
+            {181, new[] {658}}, // Ampharos @ Ampharosite
+            {212, new[] {670}}, // Scizor @ Scizorite
+            {214, new[] {680}}, // Heracross @ Heracronite
+            {229, new[] {666}}, // Houndoom @ Houndoominite
+            {248, new[] {669}}, // Tyranitar @ Tyranitarite
+            {257, new[] {664}}, // Blaziken @ Blazikenite
+            {282, new[] {657}}, // Gardevoir @ Gardevoirite
+            {303, new[] {681}}, // Mawile @ Mawilite
+            {306, new[] {667}}, // Aggron @ Aggronite
+            {308, new[] {665}}, // Medicham @ Medichamite
+            {310, new[] {682}}, // Manectric @ Manectite
+            {354, new[] {668}}, // Banette @ Banettite
+            {359, new[] {677}}, // Absol @ Absolite
+            {445, new[] {683}}, // Garchomp @ Garchompite
+            {448, new[] {673}}, // Lucario @ Lucarionite
+            {460, new[] {674}}, // Abomasnow @ Abomasite
+        };
+        private static readonly Dictionary<int, int[]> MegaDictionaryAO = new Dictionary<int, int[]>
+        {
+            {015, new[] {770}}, // Beedrill @ Beedrillite
+            {018, new[] {762}}, // Pidgeot @ Pidgeotite
+            {080, new[] {760}}, // Slowbro @ Slowbronite
+            {208, new[] {761}}, // Steelix @ Steelixite
+            {254, new[] {753}}, // Sceptile @ Sceptilite
+            {260, new[] {752}}, // Swampert @ Swampertite
+            {302, new[] {754}}, // Sableye @ Sablenite
+            {319, new[] {759}}, // Sharpedo @ Sharpedonite
+            {323, new[] {767}}, // Camerupt @ Cameruptite
+            {334, new[] {755}}, // Altaria @ Altarianite
+            {362, new[] {763}}, // Glalie @ Glalitite
+            {373, new[] {769}}, // Salamence @ Salamencite
+            {376, new[] {758}}, // Metagross @ Metagrossite
+            {380, new[] {684}}, // Latias @ Latiasite
+            {381, new[] {685}}, // Latios @ Latiosite
+            {428, new[] {768}}, // Lopunny @ Lopunnite
+            {475, new[] {756}}, // Gallade @ Galladite
+            {531, new[] {757}}, // Audino @ Audinite
+            {719, new[] {764}}, // Diancie @ Diancite
+
+            {384, new[] {-620}}, // Rayquaza @ Dragon Ascent
+        };
         private void changeSpecies(object sender, EventArgs e)
         {
             int index = LB_Gifts.SelectedIndex;
